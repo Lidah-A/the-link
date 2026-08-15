@@ -11,7 +11,7 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
 
   useEffect(() => {
   supabase.auth.getSession().then(({ data }: any) => setSession(data.session))
-  const { data: sub } = supabase.auth.onAuthStateChange((_evt: any, sess: any) => setSession(sess.session ?? null))
+  const { data: sub } = supabase.auth.onAuthStateChange((_evt: any, sess: any) => setSession(sess ?? null))
     return () => { sub.subscription?.unsubscribe() }
   }, [])
 
