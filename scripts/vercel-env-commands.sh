@@ -1,35 +1,68 @@
 #!/usr/bin/env bash
-# Templated commands to add environment variables to Vercel.
-# Replace the <PLACEHOLDER> values with your real secrets, then run this file.
-# Requires: `vercel` CLI installed and logged in, and the project set as current.
+# Read `.env.local` (local file must exist and contain real secrets) and add variables to Vercel using the `vercel` CLI.
+# Usage:
+#   ./scripts/vercel-env-commands.sh           # dry-run (shows what would run and asks confirmation)
+#   ./scripts/vercel-env-commands.sh --apply   # actually execute vercel env add for 'production'
+#   ./scripts/vercel-env-commands.sh --apply --all  # apply to production, preview, development
 
 set -euo pipefail
 
-echo "This script will print vercel env add commands. Edit values before running."
+ENV_FILE=.env.local
+if [ ! -f "$ENV_FILE" ]; then
+	echo "Error: $ENV_FILE not found. Create it from .env.local.example with your real secrets." >&2
+	exit 1
+fi
 
-# Example values — REPLACE before using
-SUPABASE_URL="<SUPABASE_URL>"
-SUPABASE_SERVICE_ROLE_KEY="<SUPABASE_SERVICE_ROLE_KEY>"
-NEXT_PUBLIC_SUPABASE_URL="$SUPABASE_URL"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="<NEXT_PUBLIC_SUPABASE_ANON_KEY>"
-SENDGRID_API_KEY="<SENDGRID_API_KEY>"
-TEAM_NOTIFICATION_EMAIL="<team@example.com>"
-NOTIFICATION_FROM_EMAIL="<no-reply@example.com>"
-SUPABASE_STORAGE_BUCKET="request-attachments"
+APPLY=false
+ALL_ENVS=false
+if [ "${1:-}" = "--apply" ]; then APPLY=true; fi
+if [ "${2:-}" = "--all" ] || [ "${1:-}" = "--all" ]; then ALL_ENVS=true; fi
 
-# Add for Production (repeat for Preview/Development as needed)
-vercel env add SUPABASE_URL "$SUPABASE_URL" production
-vercel env add SUPABASE_SERVICE_ROLE_KEY "$SUPABASE_SERVICE_ROLE_KEY" production
-vercel env add NEXT_PUBLIC_SUPABASE_URL "$NEXT_PUBLIC_SUPABASE_URL" production
-vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY "$NEXT_PUBLIC_SUPABASE_ANON_KEY" production
-vercel env add SUPABASE_STORAGE_BUCKET "$SUPABASE_STORAGE_BUCKET" production
-vercel env add SENDGRID_API_KEY "$SENDGRID_API_KEY" production
-vercel env add TEAM_NOTIFICATION_EMAIL "$TEAM_NOTIFICATION_EMAIL" production
-vercel env add NOTIFICATION_FROM_EMAIL "$NOTIFICATION_FROM_EMAIL" production
+TARGETS=(production)
+if [ "$ALL_ENVS" = true ]; then TARGETS=(production preview development); fi
 
-# To add same variables to Preview and Development, run the same commands with 'preview' and 'development'
-# Example:
-# vercel env add SUPABASE_URL "$SUPABASE_URL" preview
-# vercel env add SUPABASE_URL "$SUPABASE_URL" development
+echo "Reading variables from $ENV_FILE"
+mapfile -t LINES < <(grep -v '^\s*$' "$ENV_FILE" | grep -v '^\s*#')
+if [ ${#LINES[@]} -eq 0 ]; then
+	echo "No variables found in $ENV_FILE" && exit 1
+fi
 
-echo "Done. Verify variables in the Vercel dashboard or run 'vercel env ls'."
+echo "The script will add the following variables to Vercel targets: ${TARGETS[*]}"
+for l in "${LINES[@]}"; do
+	key=$(echo "$l" | sed -E 's/^[[:space:]]*export[[:space:]]+//' | cut -d'=' -f1)
+	value=$(echo "$l" | sed -E 's/^[^=]+=//')
+	if [ -z "$key" ] || [ -z "$value" ]; then
+		echo "Skipping empty line or missing value: $l"
+		continue
+	fi
+	echo "$key=$value"
+done
+
+if [ "$APPLY" != true ]; then
+	echo
+	echo "Dry run complete. To actually add these to Vercel run:"
+	echo "  ./scripts/vercel-env-commands.sh --apply" 
+	echo "Add --all to apply to production, preview and development: --apply --all"
+	exit 0
+fi
+
+read -p "Proceed to add variables to Vercel for targets: ${TARGETS[*]}? (y/N) " CONFIRM
+if [ "${CONFIRM,,}" != "y" ]; then
+	echo "Aborted."
+	exit 1
+fi
+
+echo "Running vercel env add commands..."
+for l in "${LINES[@]}"; do
+	key=$(echo "$l" | sed -E 's/^[[:space:]]*export[[:space:]]+//' | cut -d'=' -f1)
+	value=$(echo "$l" | sed -E 's/^[^=]+=//')
+	if [ -z "$key" ] || [ -z "$value" ]; then
+		continue
+	fi
+	for t in "${TARGETS[@]}"; do
+		echo "Adding $key to $t"
+		vercel env add "$key" "$value" "$t"
+	done
+done
+
+echo "All done. Verify variables with: vercel env ls"
