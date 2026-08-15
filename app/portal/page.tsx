@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import supabase from "../../lib/supabaseClient"
+import supabase from "@/lib/supabaseClient"
 
 export default function PortalPage() {
   const [session, setSession] = useState<any>(null)
@@ -11,10 +11,8 @@ export default function PortalPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, sess) => {
-      setSession(sess.session ?? null)
-    })
+    supabase.auth.getSession().then(({ data }: any) => setSession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt: any, sess: any) => setSession(sess.session ?? null))
     return () => { sub.subscription?.unsubscribe() }
   }, [])
 

@@ -9,7 +9,7 @@ const UpdateSchema = z.object({
   notes: z.string().optional(),
 })
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, context: any) {
   try {
     const auth = req.headers.get("authorization")
     if (!auth?.startsWith("Bearer ")) {
@@ -33,7 +33,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       return NextResponse.json({ success: false, error: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const id = params.id
+    const id = (context.params && context.params.id) || context.params?.id
     const updates = parsed.data
 
     const { data, error } = await supabase.from("sourcing_requests").update(updates).eq("id", id).select()
@@ -47,7 +47,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: any) {
   try {
     const auth = req.headers.get("authorization")
     if (!auth?.startsWith("Bearer ")) {
@@ -65,7 +65,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 })
     }
 
-    const id = params.id
+    const id = (context.params && context.params.id) || context.params?.id
     const { data, error } = await supabase.from("sourcing_requests").select("*").eq("id", id)
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     return NextResponse.json({ success: true, request: data?.[0] ?? null })

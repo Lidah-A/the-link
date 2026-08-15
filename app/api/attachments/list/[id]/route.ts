@@ -3,9 +3,9 @@ import supabase from "@/lib/supabaseServer"
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'request-attachments'
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: any) {
   try {
-    const { id } = params
+    const { id } = (context.params && context.params.id) ? { id: context.params.id } : { id: context.params?.id }
     // list files under prefix `${id}/`
     const { data, error } = await supabase.storage.from(BUCKET).list(`${id}/`, { limit: 100, offset: 0 })
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })

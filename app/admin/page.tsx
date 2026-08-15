@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import supabase from "../../lib/supabaseClient"
+import supabase from "@/lib/supabaseClient"
 
 export default function AdminPage() {
   const [session, setSession] = useState<any>(null)
@@ -11,8 +11,8 @@ export default function AdminPage() {
   const [editing, setEditing] = useState<Record<string, { status?: string; notes?: string }>>({})
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, sess) => {
+    supabase.auth.getSession().then(({ data }: any) => setSession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt: any, sess: any) => {
       setSession(sess.session ?? null)
     })
     return () => { sub.subscription?.unsubscribe() }

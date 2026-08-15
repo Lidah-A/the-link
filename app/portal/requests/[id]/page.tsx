@@ -11,8 +11,8 @@ export default function PortalRequestDetail({ params }: { params: { id: string }
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, sess) => setSession(sess.session ?? null))
+    supabase.auth.getSession().then(({ data }: any) => setSession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt: any, sess: any) => setSession(sess.session ?? null))
     return () => { sub.subscription?.unsubscribe() }
   }, [])
 
