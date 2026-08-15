@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
-import supabase from "../../../lib/supabaseClient"
+import supabase from "@/lib/supabaseClient"
 
 export default function PortalRequestDetail({ params }: { params: { id: string } }) {
   const { id } = params
