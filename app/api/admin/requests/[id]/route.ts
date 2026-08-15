@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import supabase from "../../../../lib/supabaseServer"
+import supabase from "@/lib/supabaseServer"
 import { z } from "zod"
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || process.env.TEAM_NOTIFICATION_EMAIL || "").split(",").map(s => s.trim()).filter(Boolean)

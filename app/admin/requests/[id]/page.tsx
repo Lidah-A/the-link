@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
-import supabase from "../../../../lib/supabaseClient"
+import supabase from "@/lib/supabaseClient"
 
 export default function AdminRequestDetail({ params }: { params: { id: string } }) {
   const { id } = params

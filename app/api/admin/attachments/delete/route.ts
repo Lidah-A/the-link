@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import supabase from "../../../../lib/supabaseServer"
+import supabase from "@/lib/supabaseServer"
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'request-attachments'
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || process.env.TEAM_NOTIFICATION_EMAIL || "").split(",").map(s => s.trim()).filter(Boolean)

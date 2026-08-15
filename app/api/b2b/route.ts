@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import supabase from "../../../lib/supabaseServer"
+import supabase from "@/lib/supabaseServer"
 import { z } from "zod"
 import { notifyTeam } from "../../../lib/notify"
 
