@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Brand palette: Navy & Gold */
+  --brand-50: #F5F6F8; /* light background */
+  --brand-100: #E6EAF0;
+  --brand-200: #D6DCE6;
+  --brand-500: #D4AF37; /* gold */
+  --brand-600: #B88F2B; /* darker gold */
+  --brand-700: #92711F;
+  --brand-accent: #D4AF37;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --bg: var(--brand-50);
+  --card: #ffffff;
+  --muted: #5b6471;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --navy-900: #07132A; /* deep navy */
+  --navy-700: #0b2948;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #07132a;
+    --card: #071826;
+    --brand-500: #bfa96a;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Support explicit class-based dark theme for manual toggle */
+.theme-dark {
+  --bg: #0b0a09;
+  --card: #0f0f0f;
+  --brand-500: #8b6b55;
+  color-scheme: dark;
 }
+
+/* Base typographic tweaks and smooth animations */
+@layer base {
+  body {
+    background-color: var(--bg);
+    color: #1f1b18;
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-feature-settings: "liga" 1;
+    transition: background-color 220ms ease, color 220ms ease;
+  }
+
+  h1,h2,h3,h4 { color: #1b1410; font-weight: 600; letter-spacing: -0.01em }
+  p, label, input, textarea, select { color: #3b3632 }
+
+  input, textarea, select {
+    @apply border border-gray-200 rounded-md bg-transparent p-2 transition focus:outline-none;
+  }
+
+  a { text-decoration: none }
+}
+
+/* Reusable brand components */
+@layer components {
+  .brand-card { @apply bg-white rounded-lg shadow-md p-6 }
+  .brand-card-compact { @apply bg-white rounded-lg shadow-sm p-4 }
+
+  .brand-heading { @apply text-2xl font-semibold tracking-tight text-[var(--brand-700)] }
+  .brand-subtle { @apply text-sm text-gray-500 }
+
+  .brand-btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-semibold text-white shadow;
+    background-color: var(--brand-600);
+  }
+  .brand-btn-primary:hover { background-color: var(--brand-700) }
+
+  .brand-btn-accent {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-md font-medium text-[var(--brand-700)] border;
+    border-color: rgba(139,94,72,0.12);
+  }
+
+  .brand-form { @apply w-full max-w-md bg-white rounded-lg shadow p-6 }
+}
+
+/* Small utilities */
+.muted { color: var(--muted) }
+.tracking-id { font-family: var(--font-mono), ui-monospace, SFMono-Regular; font-size: 0.9rem }
+
+/* Smooth card hover */
+.card-hover { transition: transform 180ms ease, box-shadow 180ms ease }
+.card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(16,12,8,0.08) }
+

@@ -1,0 +1,109 @@
+"use client"
+import { useEffect, useRef, useState } from "react"
+import supabase from "../../../../lib/supabaseClient"
+
+export default function AdminRequestDetail({ params }: { params: { id: string } }) {
+  const { id } = params
+  const [session, setSession] = useState<any>(null)
+  const [request, setRequest] = useState<any>(null)
+  const [files, setFiles] = useState<any[]>([])
+  const fileRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt, sess) => setSession(sess.session ?? null))
+    return () => { sub.subscription?.unsubscribe() }
+  }, [])
+
+  async function load() {
+    if (!session) return
+    const token = session.access_token
+    const res = await fetch(`/api/admin/requests/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+    const json = await res.json()
+    if (res.ok) setRequest(json.request)
+
+    const listRes = await fetch(`/api/attachments/list/${id}`)
+    const listJson = await listRes.json()
+    if (listRes.ok) setFiles(listJson.files || [])
+  }
+
+  useEffect(() => { if (session) load() }, [session])
+
+  async function upload() {
+    const el = fileRef.current
+    if (!el || !el.files || el.files.length === 0) return
+    const file = el.files[0]
+    // client-side validation
+    const allowed = ["image/png", "image/jpeg", "image/jpg", "application/pdf"]
+    const maxBytes = 20 * 1024 * 1024 // 20 MB for admin uploads
+    if (!allowed.includes(file.type)) return alert("Invalid file type. Allowed: PNG, JPG, PDF")
+    if (file.size > maxBytes) return alert("File too large (max 20MB)")
+
+    const path = `${id}/${Date.now()}_${file.name}`
+    const bucket = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || 'request-attachments'
+    const { error } = await supabase.storage.from(bucket).upload(path, file)
+    if (error) return alert(error.message)
+
+    // log upload
+    try {
+      const token = session?.access_token
+      await fetch('/api/attachments/log', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ requestId: id, path, action: 'upload' }) })
+    } catch (e) {
+      console.warn('Failed to log upload', e)
+    }
+
+    await load()
+  }
+
+  async function remove(path: string) {
+    if (!session) return
+    const token = session.access_token
+    const res = await fetch('/api/admin/attachments/delete', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ path }) })
+    const json = await res.json()
+    if (!res.ok) alert(json.error || 'Failed to delete')
+    else await load()
+  }
+
+  if (!session) return <main className="min-h-screen flex items-center justify-center">Sign in as admin to view this request.</main>
+
+  return (
+    <main className="min-h-screen p-6 bg-gray-50">
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+        <h1 className="text-xl font-semibold">Admin Request #{id}</h1>
+        {request && (
+          <div className="mt-4">
+            <p><strong>Branch:</strong> {request.branch}</p>
+            <p><strong>Name/Company:</strong> {request.name ?? request.company}</p>
+            <p className="mt-2 text-sm text-gray-700">{request.details || request.notes}</p>
+
+            <div className="mt-4">
+              <label className="block text-sm">Attach file</label>
+              <input ref={fileRef} type="file" className="mt-2" />
+              <button onClick={upload} className="mt-2 px-3 py-1 bg-blue-600 text-white rounded">Upload</button>
+            </div>
+
+            <div className="mt-4">
+              <h2 className="font-medium">Attachments</h2>
+              <div className="mt-2 grid grid-cols-3 gap-3">
+                {files.map(f => (
+                  <div key={f.path} className="p-2 border rounded">
+                    {f.name.match(/\.(png|jpe?g)$/i) ? (
+                      <img src={f.url} alt={f.name} className="w-full h-32 object-cover rounded" onClick={() => window.open(f.url, '_blank')} />
+                    ) : (
+                      <a href={f.url} target="_blank" rel="noreferrer" className="text-blue-600">{f.name}</a>
+                    )}
+                    <div className="mt-2 flex justify-between items-center">
+                      <div className="text-xs text-gray-600">{f.name}</div>
+                      <button onClick={() => remove(f.path)} className="text-sm text-red-600">Delete</button>
+                    </div>
+                  </div>
+                ))}
+                {files.length === 0 && <div className="text-sm text-gray-500">No attachments</div>}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
