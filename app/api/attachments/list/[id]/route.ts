@@ -11,7 +11,7 @@ export async function GET(req: Request, context: any) {
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
 
     // create signed URLs for each file (1 hour)
-    const files = await Promise.all((data || []).map(async (f) => {
+    const files = await Promise.all((data || []).map(async (f: { name: string }) => {
       const path = `${id}/${f.name}`
       const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600)
       return { name: f.name, path, url: signed?.signedUrl ?? null }
