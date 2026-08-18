@@ -22,8 +22,15 @@ TARGETS=(production)
 if [ "$ALL_ENVS" = true ]; then TARGETS=(production preview development); fi
 
 echo "Reading variables from $ENV_FILE"
-mapfile -t LINES < <(grep -v '^\s*$' "$ENV_FILE" | grep -v '^\s*#')
-if [ ${#LINES[@]} -eq 0 ]; then
+LINES=()
+while IFS= read -r l; do
+	# skip empty and commented lines
+	if [[ -z "$l" ]] || [[ "$l" =~ ^[[:space:]]*# ]]; then
+		continue
+	fi
+	LINES+=("$l")
+done < <(grep -v '^\s*$' "$ENV_FILE" | grep -v '^\s*#')
+if [ "${#LINES[@]}" -eq 0 ]; then
 	echo "No variables found in $ENV_FILE" && exit 1
 fi
 
