@@ -73,10 +73,11 @@ for l in "${LINES[@]}"; do
 	if [ -z "$key" ] || [ -z "$value" ]; then
 		continue
 	fi
-	for t in "${TARGETS[@]}"; do
-		echo "Adding $key to $t"
-		$VERCEL_CMD env add "$key" "$value" "$t"
-	done
+		for t in "${TARGETS[@]}"; do
+			echo "Adding $key to $t"
+			# Use --value and --yes for non-interactive addition
+			$VERCEL_CMD env add "$key" --value "$value" "$t" --yes
+		done
 done
 
 echo "All done. Verify variables with: vercel env ls"
