@@ -60,6 +60,13 @@ if [ "$(echo "$CONFIRM" | tr '[:upper:]' '[:lower:]')" != "y" ]; then
 fi
 
 echo "Running vercel env add commands..."
+if command -v vercel >/dev/null 2>&1; then
+  VERCEL_CMD=vercel
+else
+  VERCEL_CMD="npx vercel"
+  echo "Note: 'vercel' not found globally; using 'npx vercel' which may install temporarily."
+fi
+
 for l in "${LINES[@]}"; do
 	key=$(echo "$l" | sed -E 's/^[[:space:]]*export[[:space:]]+//' | cut -d'=' -f1)
 	value=$(echo "$l" | sed -E 's/^[^=]+=//')
@@ -68,7 +75,7 @@ for l in "${LINES[@]}"; do
 	fi
 	for t in "${TARGETS[@]}"; do
 		echo "Adding $key to $t"
-		vercel env add "$key" "$value" "$t"
+		$VERCEL_CMD env add "$key" "$value" "$t"
 	done
 done
 
