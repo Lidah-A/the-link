@@ -54,7 +54,7 @@ if [ "$APPLY" != true ]; then
 fi
 
 read -p "Proceed to add variables to Vercel for targets: ${TARGETS[*]}? (y/N) " CONFIRM
-if [ "${CONFIRM,,}" != "y" ]; then
+if [ "$(echo "$CONFIRM" | tr '[:upper:]' '[:lower:]')" != "y" ]; then
 	echo "Aborted."
 	exit 1
 fi
