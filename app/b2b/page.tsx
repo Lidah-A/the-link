@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import SuccessConfirmation from "../components/SuccessConfirmation"
+import BudgetConverter from "@/app/components/BudgetConverter"
 
 export default function B2BRequest() {
   const [form, setForm] = useState({
@@ -11,6 +12,7 @@ export default function B2BRequest() {
     businessType: "",
     categories: "",
     orderSize: "",
+    orderCurrency: "USD",
     timeline: "",
     notes: "",
   })
@@ -100,7 +102,18 @@ export default function B2BRequest() {
         <div className="grid grid-cols-2 gap-3 mt-3">
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Order size</span>
-            <input name="orderSize" value={form.orderSize} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-200 p-2" placeholder="units / value" />
+            <div className="mt-1 flex gap-2">
+              <input name="orderSize" value={form.orderSize} onChange={handleChange} className="flex-1 rounded-md border-gray-200 p-2" placeholder="e.g. 1000 or 5000" />
+              <select name="orderCurrency" value={form.orderCurrency} onChange={handleChange} className="w-28 rounded-md border-gray-200 p-2">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+            <div className="mt-2">
+              {/* @ts-ignore */}
+              <BudgetConverter value={form.orderSize} currency={form.orderCurrency as any} />
+            </div>
           </label>
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Timeline</span>

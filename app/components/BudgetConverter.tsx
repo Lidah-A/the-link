@@ -1,9 +1,9 @@
 "use client"
 import { useMemo, useState } from "react"
 
-type Props = { value: string }
+type Props = { value: string, currency?: 'USD' | 'EUR' | 'GBP' }
 
-export default function BudgetConverter({ value }: Props) {
+export default function BudgetConverter({ value, currency = 'USD' }: Props) {
   const [rateUSDToEUR, setRateUSDToEUR] = useState(0.92)
   const [rateUSDToGBP, setRateUSDToGBP] = useState(0.78)
 
@@ -19,15 +19,20 @@ export default function BudgetConverter({ value }: Props) {
 
   if (!parsed) return <div className="mt-2 text-sm text-gray-500">Enter a numeric budget to see conversions.</div>
 
-  const eur = (parsed * rateUSDToEUR).toFixed(2)
-  const gbp = (parsed * rateUSDToGBP).toFixed(2)
+  // normalize to USD first
+  let usdAmount = parsed
+  if (currency === 'EUR') usdAmount = parsed / rateUSDToEUR
+  if (currency === 'GBP') usdAmount = parsed / rateUSDToGBP
+
+  const eur = (usdAmount * rateUSDToEUR).toFixed(2)
+  const gbp = (usdAmount * rateUSDToGBP).toFixed(2)
 
   return (
     <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
-          <div className="text-xs text-gray-600">Parsed USD amount</div>
-          <div className="font-medium">${parsed.toLocaleString()}</div>
+          <div className="text-xs text-gray-600">Parsed amount ({currency})</div>
+          <div className="font-medium">{currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '£'}{parsed.toLocaleString()}</div>
         </div>
         <div className="w-1/3">
           <div className="text-xs text-gray-600">EUR (approx)</div>
