@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import SuccessConfirmation from "../components/SuccessConfirmation"
+import BudgetConverter from "@/app/components/BudgetConverter"
 
 export default function PersonalEditRequest() {
   const [form, setForm] = useState({
@@ -92,7 +93,16 @@ export default function PersonalEditRequest() {
         <label className="block mt-3">
           <span className="text-sm font-medium text-gray-700">Budget (USD)</span>
           <input name="budget" value={form.budget} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-200 p-2" placeholder="e.g. 200-500" />
+          {/* Budget converter shows approximate EUR/GBP values */}
+          {/* Imported component below */}
         </label>
+        {/* Dynamically import converter to keep this file simple */}
+        {/* @ts-ignore-next-line */}
+        <div className="mt-1">
+          {/* eslint-disable-next-line react/jsx-no-undef */}
+          {/* Component */}
+          <BudgetConverter value={form.budget} />
+        </div>
 
         <label className="block mt-3">
           <span className="text-sm font-medium text-gray-700">Additional details</span>
