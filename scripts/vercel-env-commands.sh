@@ -15,8 +15,14 @@ fi
 
 APPLY=false
 ALL_ENVS=false
-if [ "${1:-}" = "--apply" ]; then APPLY=true; fi
-if [ "${2:-}" = "--all" ] || [ "${1:-}" = "--all" ]; then ALL_ENVS=true; fi
+OVERWRITE=false
+for arg in "$@"; do
+	case "$arg" in
+		--apply) APPLY=true ;;
+		--all) ALL_ENVS=true ;;
+		--overwrite) OVERWRITE=true ;;
+	esac
+done
 
 TARGETS=(production)
 if [ "$ALL_ENVS" = true ]; then TARGETS=(production preview development); fi
@@ -75,6 +81,10 @@ for l in "${LINES[@]}"; do
 	fi
 		for t in "${TARGETS[@]}"; do
 			echo "Adding $key to $t"
+			if [ "$OVERWRITE" = true ]; then
+				echo "- overwriting existing variable (if present)"
+				$VERCEL_CMD env remove "$key" "$t" --yes || true
+			fi
 			# Use --value and --yes for non-interactive addition
 			$VERCEL_CMD env add "$key" --value "$value" "$t" --yes
 		done
