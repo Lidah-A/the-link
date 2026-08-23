@@ -12,6 +12,7 @@ const BodySchema = z.object({
 const OPENAI_KEY = process.env.OPENAI_API_KEY
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini'
 const SYSTEM_PROMPT = process.env.CHATBOT_SYSTEM_PROMPT || 'You are a helpful assistant.'
+const CHATBOT_NAME = process.env.CHATBOT_NAME || 'Your Personal Assistant'
 
 export async function POST(req: Request) {
   try {
@@ -32,7 +33,10 @@ export async function POST(req: Request) {
 
     if (!resp.ok) {
       const errText = await resp.text()
-      return NextResponse.json({ success: false, error: 'LLM error', details: errText }, { status: 502 })
+      const friendlyError = errText.includes('insufficient_quota') || errText.includes('credit_balance_exhausted')
+        ? `${CHATBOT_NAME} is connected, but the OpenAI account needs credits.`
+        : 'LLM error'
+      return NextResponse.json({ success: false, error: friendlyError, details: errText }, { status: 502 })
     }
 
     const j = await resp.json()

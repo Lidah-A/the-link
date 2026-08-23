@@ -1,6 +1,12 @@
+import PageSeo from "./components/PageSeo"
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#fef3c7_0%,#fff7ed_28%,#ffffff_60%)] text-zinc-950">
+      <PageSeo
+        title="Home"
+        description="The Link sourcing platform for personal edit requests, B2B sourcing, and Your Personal Assistant support."
+      />
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-6 py-16 sm:px-10 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div className="space-y-8">
@@ -13,7 +19,7 @@ export default function Home() {
                 Requests, sourcing, and support in one clean workflow.
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-zinc-700 sm:text-xl">
-                Submit a personal edit request, send a B2B sourcing request, or open the chatbot for quick help. Built to be simple on mobile and fast to launch.
+                Submit a personal edit request, send a B2B sourcing request, or open Your Personal Assistant for quick help. Built to be simple on mobile and fast to launch.
               </p>
             </div>
 
@@ -34,7 +40,7 @@ export default function Home() {
                 href="/chat"
                 className="inline-flex h-12 items-center justify-center rounded-full border border-transparent px-6 text-sm font-semibold text-zinc-700 transition hover:bg-white/70 hover:text-zinc-950"
               >
-                Ask the chatbot
+                Ask Your Personal Assistant
               </a>
             </div>
 
@@ -49,7 +55,7 @@ export default function Home() {
               </div>
               <div className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
                 <div className="text-sm font-medium text-zinc-500">Support</div>
-                <div className="mt-2 text-lg font-semibold">Built-in chatbot</div>
+                <div className="mt-2 text-lg font-semibold">Built-in personal assistant</div>
               </div>
             </div>
           </div>
@@ -70,7 +76,7 @@ export default function Home() {
                   </div>
                   <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                     <div className="text-sm text-zinc-500">3. Support</div>
-                    <div className="mt-1 text-lg font-semibold">Chatbot and admin routes available</div>
+                    <div className="mt-1 text-lg font-semibold">Personal assistant and admin routes available</div>
                   </div>
                 </div>
               </div>

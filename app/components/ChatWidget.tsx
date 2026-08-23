@@ -3,7 +3,11 @@ import { useState } from "react"
 
 type Msg = { role: 'user' | 'assistant', text: string }
 
-export default function ChatWidget() {
+type Props = {
+  assistantName?: string
+}
+
+export default function ChatWidget({ assistantName = 'Your Personal Assistant' }: Props) {
   const [messages, setMessages] = useState<Msg[]>([])
   const [text, setText] = useState("")
   const [loading, setLoading] = useState(false)
@@ -20,10 +24,10 @@ export default function ChatWidget() {
       if (res.ok && j.reply) {
         setMessages((m) => [...m, { role: 'assistant', text: j.reply }])
       } else {
-        setMessages((m) => [...m, { role: 'assistant', text: 'Sorry, I could not get a reply.' }])
+        setMessages((m) => [...m, { role: 'assistant', text: j.error || `Sorry, ${assistantName} could not get a reply.` }])
       }
     } catch (e) {
-      setMessages((m) => [...m, { role: 'assistant', text: 'Error contacting chat service.' }])
+      setMessages((m) => [...m, { role: 'assistant', text: `Error contacting ${assistantName}.` }])
     } finally {
       setLoading(false)
     }
@@ -41,7 +45,7 @@ export default function ChatWidget() {
       </div>
 
       <div className="flex gap-2">
-        <input value={text} onChange={(e) => setText(e.target.value)} className="flex-1 p-2 border rounded" placeholder="Ask a question..." />
+        <input value={text} onChange={(e) => setText(e.target.value)} className="flex-1 p-2 border rounded" placeholder={`Ask ${assistantName} a question...`} />
         <button onClick={send} disabled={loading} className="brand-btn-primary">{loading ? 'Sending...' : 'Send'}</button>
       </div>
     </div>
