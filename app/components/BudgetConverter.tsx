@@ -1,11 +1,27 @@
 "use client"
 import { useMemo, useState } from "react"
 
-type Props = { value: string, currency?: 'USD' | 'EUR' | 'GBP' }
+export const currencyOptions = [
+  { code: 'USD', label: 'United States Dollar (USD)', symbol: '$' },
+  { code: 'EUR', label: 'Euro (EUR)', symbol: '€' },
+  { code: 'GBP', label: 'British Pound (GBP)', symbol: '£' },
+  { code: 'TRY', label: 'Turkish Lira (TRY)', symbol: '₺' },
+  { code: 'ZMW', label: 'Zambian Kwacha (ZMW)', symbol: 'ZK' },
+  { code: 'ZAR', label: 'South African Rand (ZAR)', symbol: 'R' },
+  { code: 'TZS', label: 'Tanzanian Shilling (TZS)', symbol: 'TSh' },
+  { code: 'MWK', label: 'Malawian Kwacha (MWK)', symbol: 'MK' },
+  { code: 'NAD', label: 'Namibian Dollar (NAD)', symbol: 'N$' },
+  { code: 'BWP', label: 'Botswana Pula (BWP)', symbol: 'P' },
+] as const
+
+export type CurrencyCode = (typeof currencyOptions)[number]['code']
+
+type Props = { value: string, currency?: CurrencyCode }
 
 export default function BudgetConverter({ value, currency = 'USD' }: Props) {
   const [rateUSDToEUR, setRateUSDToEUR] = useState(0.92)
   const [rateUSDToGBP, setRateUSDToGBP] = useState(0.78)
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(currency)
 
   const parsed = useMemo(() => {
     if (!value) return null
@@ -21,18 +37,34 @@ export default function BudgetConverter({ value, currency = 'USD' }: Props) {
 
   // normalize to USD first
   let usdAmount = parsed
-  if (currency === 'EUR') usdAmount = parsed / rateUSDToEUR
-  if (currency === 'GBP') usdAmount = parsed / rateUSDToGBP
+  if (selectedCurrency === 'EUR') usdAmount = parsed / rateUSDToEUR
+  if (selectedCurrency === 'GBP') usdAmount = parsed / rateUSDToGBP
 
   const eur = (usdAmount * rateUSDToEUR).toFixed(2)
   const gbp = (usdAmount * rateUSDToGBP).toFixed(2)
+  const currentCurrency = currencyOptions.find((option) => option.code === selectedCurrency) ?? currencyOptions[0]
 
   return (
     <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+      <label className="block mb-3">
+        <span className="text-xs text-gray-600">Choose currency</span>
+        <select
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value as CurrencyCode)}
+          className="mt-1 block w-full rounded-md border border-gray-200 bg-white p-2"
+        >
+          {currencyOptions.map((option) => (
+            <option key={option.code} value={option.code}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
-          <div className="text-xs text-gray-600">Parsed amount ({currency})</div>
-          <div className="font-medium">{currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '£'}{parsed.toLocaleString()}</div>
+          <div className="text-xs text-gray-600">Parsed amount ({currentCurrency.code})</div>
+          <div className="font-medium">{currentCurrency.symbol}{parsed.toLocaleString()}</div>
         </div>
         <div className="w-1/3">
           <div className="text-xs text-gray-600">EUR (approx)</div>

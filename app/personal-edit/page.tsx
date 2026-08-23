@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import SuccessConfirmation from "../components/SuccessConfirmation"
-import BudgetConverter from "@/app/components/BudgetConverter"
+import BudgetConverter, { currencyOptions, type CurrencyCode } from "@/app/components/BudgetConverter"
 
 export default function PersonalEditRequest() {
   const [form, setForm] = useState({
@@ -10,6 +10,7 @@ export default function PersonalEditRequest() {
     phone: "",
     style: "",
     budget: "",
+    budgetCurrency: "USD" as CurrencyCode,
     details: "",
   })
   const [submitted, setSubmitted] = useState(false)
@@ -91,17 +92,18 @@ export default function PersonalEditRequest() {
         </label>
 
         <label className="block mt-3">
-          <span className="text-sm font-medium text-gray-700">Budget (USD)</span>
-          <input name="budget" value={form.budget} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-200 p-2" placeholder="e.g. 200-500" />
-          {/* Budget converter shows approximate EUR/GBP values */}
-          {/* Imported component below */}
+          <span className="text-sm font-medium text-gray-700">Budget</span>
+          <div className="mt-1 flex gap-2">
+            <input name="budget" value={form.budget} onChange={handleChange} className="flex-1 rounded-md border-gray-200 p-2" placeholder="e.g. 200-500" />
+            <select name="budgetCurrency" value={form.budgetCurrency} onChange={handleChange} className="w-44 rounded-md border-gray-200 p-2">
+              {currencyOptions.map((option) => (
+                <option key={option.code} value={option.code}>{option.label}</option>
+              ))}
+            </select>
+          </div>
         </label>
-        {/* Dynamically import converter to keep this file simple */}
-        {/* @ts-ignore-next-line */}
         <div className="mt-1">
-          {/* eslint-disable-next-line react/jsx-no-undef */}
-          {/* Component */}
-          <BudgetConverter value={form.budget} />
+          <BudgetConverter value={form.budget} currency={form.budgetCurrency} />
         </div>
 
         <label className="block mt-3">

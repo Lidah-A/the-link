@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import SuccessConfirmation from "../components/SuccessConfirmation"
-import BudgetConverter from "@/app/components/BudgetConverter"
+import BudgetConverter, { currencyOptions } from "@/app/components/BudgetConverter"
 
 export default function B2BRequest() {
   const [form, setForm] = useState({
@@ -105,9 +105,9 @@ export default function B2BRequest() {
             <div className="mt-1 flex gap-2">
               <input name="orderSize" value={form.orderSize} onChange={handleChange} className="flex-1 rounded-md border-gray-200 p-2" placeholder="e.g. 1000 or 5000" />
               <select name="orderCurrency" value={form.orderCurrency} onChange={handleChange} className="w-28 rounded-md border-gray-200 p-2">
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
+                {currencyOptions.map((option) => (
+                  <option key={option.code} value={option.code}>{option.label}</option>
+                ))}
               </select>
             </div>
             <div className="mt-2">
